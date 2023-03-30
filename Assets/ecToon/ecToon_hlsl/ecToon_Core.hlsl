@@ -53,7 +53,7 @@ float4 frag(Varyings i) : SV_TARGET{
 
     float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv) * _MainColor;
 
-    //パーリンノイズを
+    //overlay perlin noise(alpha = 0.2)
     col = lerp(col, noise_overlay(col, i.uv, 1, float2(_noiseScale, _noiseScale)), _noise);
     // environment lighting
     float3 ambColor = col.xyz * (float3)SampleSH(i.normal) * _envLight;
