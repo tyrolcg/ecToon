@@ -16,6 +16,8 @@ Shader "Custom/ecToon"
         _Outline_thickness("Outline thickness", float) = 1
         _Outline_tress ("Outline color tress", Range(0.0, 1.0)) = 0.0
         [Toggle]_envLight ("Environment Light", int) = 1.0
+        [Toggle]_noise("Noise", int) = 0.0
+        _noiseScale("Noise Scale", float) = 5000
     }
 
     SubShader

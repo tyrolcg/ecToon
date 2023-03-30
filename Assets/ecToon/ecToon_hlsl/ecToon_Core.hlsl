@@ -4,13 +4,16 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "ecToon_lighting.hlsl"
+#include "ecToon_Math.hlsl"
+
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);
 float4 _MainTex_ST;
 float4 _MainColor;
 
 int _envLight;
-
+int _noise;
+float _noiseScale;
 int _isLim;
 //outline
 float _isOutline;
@@ -50,6 +53,8 @@ float4 frag(Varyings i) : SV_TARGET{
 
     float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv) * _MainColor;
 
+    //パーリンノイズを
+    col = lerp(col, noise_overlay(col, i.uv, 1, float2(_noiseScale, _noiseScale)), _noise);
     // environment lighting
     float3 ambColor = col.xyz * (float3)SampleSH(i.normal) * _envLight;
     
