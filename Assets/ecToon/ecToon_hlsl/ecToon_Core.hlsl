@@ -7,7 +7,9 @@
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);
 float4 _MainTex_ST;
+float4 _MainColor;
 
+int _envLight;
 
 int _isLim;
 //outline
@@ -46,10 +48,10 @@ float4 frag(Varyings i) : SV_TARGET{
     UNITY_SETUP_INSTANCE_ID(i);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
-    float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+    float4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv) * _MainColor;
 
     // environment lighting
-    float4 ambColor = float4(col * SampleSH(i.normal), 0);
+    float3 ambColor = col.xyz * (float3)SampleSH(i.normal) * _envLight;
     
     Light dirLight = GetMainLight();
     col = CalcShadow(col, dirLight, i.uv, i.normal);
@@ -59,10 +61,10 @@ float4 frag(Varyings i) : SV_TARGET{
     colLight += CalcLimLight(normalInView, i.normal, dirLight, _Lim_intensity, _Lim_power) * _isLim;
     colLight = max(colLight, 0);
 
-    col *= float4(colLight, col.w);
-    col += float4(i.vertexColor, 0);
-    col += float4(AdditionalPixelLighting(i.positionWS.xyz, i.normal), 0);
-    col += ambColor;
+    col.xyz *= colLight;
+    col.xyz += i.vertexColor;
+    col.xyz += AdditionalPixelLighting(i.positionWS.xyz, i.normal);
+    col.xyz += ambColor;
 
     /*end culc lighting*/
     return col;

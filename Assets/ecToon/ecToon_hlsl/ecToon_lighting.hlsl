@@ -44,13 +44,15 @@ float3 CalcDirectionLightEffect(Light light, float3 normal, float threshold){
 
 //影の色と閾値を計算
 float4 CalcShadow(float4 colorBase, Light light, float2 uv, float3 normal){
-    float4 shadowColor = SAMPLE_TEXTURE2D(_Shadow_Tex, sampler_Shadow_Tex, uv) * _Shadow_col;
+    
+    float3 shadowColor = SAMPLE_TEXTURE2D(_Shadow_Tex, sampler_Shadow_Tex, uv) * _Shadow_col;
 
     float power = dot(light.direction, normal)/2;
     power += 0.5;
     // if power <= _shadow_threshold s = 1, else s = 0
     float s = step(power, _Shadow_threshold);
-    float4 color = lerp(colorBase, shadowColor, s);
+    float4 color = float4(lerp(colorBase.xyz, shadowColor.xyz, s) , colorBase.w);
+
     return color;
 }
 

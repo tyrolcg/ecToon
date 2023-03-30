@@ -3,8 +3,9 @@ Shader "Custom/ecToon"
     Properties
     {
         [NoScaleOffset]_MainTex ("Texture", 2D) = "white" {}
-        [NoScaleOffset]_Shadow_Tex("Shadow Texture", 2D) = "_MainTex"{}
-        _Shadow_col("Shadow color", Color) = (1,1,1,1)
+        _MainColor("Main Color", Color) = (1,1,1,1)
+        [NoScaleOffset]_Shadow_Tex("Shadow Texture", 2D) = "white"{}
+        _Shadow_col("Shadow Color", Color) = (0.8,0.8,0.8,1)
         _Shadow_threshold("Shadow Threshold", Range(0.0, 1.0)) = 0.6
         [Toggle]_isLim ("Lim light", int) = 0.0
         _Lim_intensity ("Lim light intensity", float) = 1.0
@@ -14,6 +15,7 @@ Shader "Custom/ecToon"
         _Outline_color ("Outline color", Color) = (0,0,0,1)
         _Outline_thickness("Outline thickness", float) = 1
         _Outline_tress ("Outline color tress", Range(0.0, 1.0)) = 0.0
+        [Toggle]_envLight ("Environment Light", int) = 1.0
     }
 
     SubShader
@@ -41,7 +43,6 @@ Shader "Custom/ecToon"
             HLSLPROGRAM
             #pragma multi_compile _ALPHA_OPAQUE
             
-            #ifdef _ALPHA_OPAQUE
             #pragma multi_compile_fog
             #pragma multi_compile _ _ADDITIONAL_LIGHTS _ADDITIONAL_LIGHTS_VERTEX
             
@@ -49,7 +50,6 @@ Shader "Custom/ecToon"
             #pragma vertex vert
             #pragma fragment frag
             
-            #endif
             ENDHLSL
         }
         
