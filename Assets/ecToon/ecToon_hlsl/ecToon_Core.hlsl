@@ -5,12 +5,12 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "ecToon_lighting.hlsl"
 #include "ecToon_Math.hlsl"
-
+CBUFFER_START(UnityPerMaterial)
 TEXTURE2D(_MainTex);
 SAMPLER(sampler_MainTex);
 float4 _MainTex_ST;
 float4 _MainColor;
-
+CBUFFER_END
 int _envLight;
 int _noise;
 float _noiseScale;
@@ -39,7 +39,7 @@ struct Varyings
 Varyings vert(Attributes i){
     Varyings o = (Varyings)0;
     o.vertex = TransformObjectToHClip(i.positionOS.xyz);
-    o.positionWS = mul(UNITY_MATRIX_M, i.positionOS);
+    o.positionWS = mul(unity_ObjectToWorld, i.positionOS);
     o.uv = TRANSFORM_TEX(i.uv, _MainTex);
     o.normal = TransformObjectToWorldNormal(i.normalOS);
     o.vertexColor = VertexLighting(mul(UNITY_MATRIX_M, i.positionOS).xyz, o.normal);
@@ -59,16 +59,18 @@ float4 frag(Varyings i) : SV_TARGET{
     float3 ambColor = col.xyz * (float3)SampleSH(i.normal) * _envLight;
     
     Light dirLight = GetMainLight();
-    col = CalcShadow(col, dirLight, i.uv, i.normal);
+    col.xyz = CalcShadow(col, dirLight, i.uv, i.normal);
     float3 colLight = dirLight.color;
 
-    float3 normalInView = normalize(mul((float3x3)UNITY_MATRIX_V, i.normal));
-    colLight += CalcLimLight(normalInView, i.normal, dirLight, _Lim_intensity, _Lim_power) * _isLim;
+    
+    
+    colLight += CalcLimLight(i.positionWS, i.normal, dirLight, _Lim_intensity, _Lim_power);
+    
     colLight = max(colLight, 0);
+    colLight += AdditionalPixelLighting(i.positionWS.xyz, i.normal);
 
     col.xyz *= colLight;
     col.xyz += i.vertexColor;
-    col.xyz += AdditionalPixelLighting(i.positionWS.xyz, i.normal);
     col.xyz += ambColor;
 
     /*end culc lighting*/

@@ -7,7 +7,7 @@ Shader "Custom/ecToon"
         [NoScaleOffset]_Shadow_Tex("Shadow Texture", 2D) = "white"{}
         _Shadow_col("Shadow Color", Color) = (0.8,0.8,0.8,1)
         _Shadow_threshold("Shadow Threshold", Range(0.0, 1.0)) = 0.6
-        [Toggle]_isLim ("Lim light", int) = 0.0
+        [KeywordEnum(NONE, ALWAYS, WITH_DIRECTIONAL_LIGHT)]_LimLightSetting ("Lim light", int) = 0.0
         _Lim_intensity ("Lim light intensity", float) = 1.0
         _Lim_power ("Lim light power", float) = 2.0
         [HDR]_Lim_color ("Lim light color", color) = (1,1,1,1)
@@ -24,8 +24,8 @@ Shader "Custom/ecToon"
     {
 
         Tags {
-            "RenderType"="Opaque"
-            "Queue"="Geometry"
+            "RenderType"="Transparent"
+            "Queue"="Transparent"
             "RenderPipeline" = "UniversalPipeline"
         }
         LOD 100
@@ -47,6 +47,7 @@ Shader "Custom/ecToon"
             
             #pragma multi_compile_fog
             #pragma multi_compile _ _ADDITIONAL_LIGHTS _ADDITIONAL_LIGHTS_VERTEX
+            #pragma multi_compile _ _LIMLIGHTSETTING_NONE _LIMLIGHTSETTING_ALWAYS _LIMLIGHTSETTING_WITH_DIRECTIONAL_LIGHT
             
             #include "ecToon_hlsl/ecToon_Core.hlsl"
             #pragma vertex vert
@@ -59,7 +60,7 @@ Shader "Custom/ecToon"
         Pass{
             Name "Shadow Caster"
             Tags{"LightMode"="ShadowCaster"}
-            
+            Blend SrcAlpha OneMinusSrcAlpha
             ZWrite On
             ZTest LEqual
             

@@ -43,7 +43,7 @@ float3 CalcDirectionLightEffect(Light light, float3 normal, float threshold){
 }
 
 //影の色と閾値を計算
-float4 CalcShadow(float4 colorBase, Light light, float2 uv, float3 normal){
+float3 CalcShadow(float3 colorBase, Light light, float2 uv, float3 normal){
     
     float3 shadowColor = SAMPLE_TEXTURE2D(_Shadow_Tex, sampler_Shadow_Tex, uv) * _Shadow_col;
 
@@ -51,7 +51,7 @@ float4 CalcShadow(float4 colorBase, Light light, float2 uv, float3 normal){
     power += 0.5;
     // if power <= _shadow_threshold s = 1, else s = 0
     float s = step(power, _Shadow_threshold);
-    float4 color = float4(lerp(colorBase.xyz, shadowColor.xyz, s) , colorBase.w);
+    float3 color = lerp(colorBase.xyz, shadowColor.xyz, s);
 
     return color;
 }
@@ -107,22 +107,30 @@ float3 AdditionalPixelLighting(float3 positionWS, float3 normalWS)
     return pixelLightColor;
 }
 //リムライト
-float3 CalcLimLight(float3 normalInView, float3 normalWS, Light light, float intensity, float limPower){
+float3 CalcLimLight(float3 positionWS, float3 normalWS, Light light, float intensity, float limPower){
 
     intensity = max(intensity, 0);
     limPower = max(limPower, 0);
 
     //法線と入射方向に対する強度
     float power1 = 1 - max(0, dot(normalize(light.direction), normalize(normalWS)));
-
+    
     //視線と入射方向に対する強度
-    normalInView = normalize(normalInView);
+    float3 normalInView = normalize(mul((float3x3)UNITY_MATRIX_V, normalWS));
     float power2 = 1 - max(0, normalInView.z);
-
-    //視線とライトの方向が逆のときリムライトを出す
-    float3 ViewZ = UNITY_MATRIX_V[2].xyz;
-    float power3 = max(0, dot(normalize(light.direction), normalize(-ViewZ)));
-
+    
+    float power3 = 0;
+    #ifdef _LIMLIGHTSETTING_NONE
+        power3 = 0;
+    #elif _LIMLIGHTSETTING_ALWAYS
+        power3 = 1;
+    #elif _LIMLIGHTSETTING_WITH_DIRECTIONAL_LIGHT
+        //視線とライトの方向が逆のときリムライトを出す
+        float3 ViewZ = UNITY_MATRIX_V[2].xyz;
+        power3 = max(0, dot(normalize(light.direction), normalize(-ViewZ)));
+    #endif
+    
+    
     float power = abs(power1 * power2 * power3);
     power = pow(power, limPower) * intensity;
     float3 col = float3(_Lim_color.xyz) * light.color * power;
