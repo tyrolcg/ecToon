@@ -60,13 +60,13 @@ Shader "Custom/ecToon"
         Pass{
             Name "Shadow Caster"
             Tags{"LightMode"="ShadowCaster"}
-            Blend SrcAlpha OneMinusSrcAlpha
             ZWrite On
             ZTest LEqual
             
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #include "ecToon_hlsl/ecToon_ShadowCaster.hlsl"
             ENDHLSL
         }
@@ -75,6 +75,7 @@ Shader "Custom/ecToon"
             Name "Outline"
             Tags{
             }
+            Blend SrcAlpha OneMinusSrcAlpha
             cull front
 
 
