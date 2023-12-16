@@ -2,6 +2,7 @@ Shader "Custom/ecToon"
 {
     Properties
     {
+        [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0.0
         [NoScaleOffset]_MainTex ("Texture", 2D) = "white" {}
         _MainColor("Main Color", Color) = (1,1,1,1)
         [NoScaleOffset]_Shadow_Tex("Shadow Texture", 2D) = "white"{}
@@ -40,7 +41,7 @@ Shader "Custom/ecToon"
                 "LightMode" = "UniversalForward"
             }
             Blend SrcAlpha OneMinusSrcAlpha
-            cull off
+            cull [_Cull]
 
             HLSLPROGRAM
             #pragma multi_compile _ALPHA_OPAQUE
@@ -48,7 +49,6 @@ Shader "Custom/ecToon"
             #pragma multi_compile_fog
             #pragma multi_compile _ _ADDITIONAL_LIGHTS _ADDITIONAL_LIGHTS_VERTEX
             #pragma multi_compile _ _LIMLIGHTSETTING_NONE _LIMLIGHTSETTING_ALWAYS _LIMLIGHTSETTING_WITH_DIRECTIONAL_LIGHT
-            
             #include "ecToon_hlsl/ecToon_Core.hlsl"
             #pragma vertex vert
             #pragma fragment frag
